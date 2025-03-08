@@ -1,3 +1,6 @@
 venv
-.vscode
+.vscode/
 data
+heightmaps
+satmaps
+archive/

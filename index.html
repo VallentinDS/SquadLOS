@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Map with Leaflet</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        .slider-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .slider {
+            width: 200px;
+        }
+        .height-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 5px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            margin: -25px 0 0 -25px;
+            border: 5px solid rgba(0, 0, 0, 0.1);
+            border-top: 5px solid #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 1000;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div class="slider-container">
+        <div>
+            <label for="satellite-opacity">Satellite Map Opacity</label>
+            <input type="range" id="satellite-opacity" class="slider" min="0" max="1" step="0.01" value="0.75">
+        </div>
+        <div>
+            <label for="color-opacity">Color Map Opacity</label>
+            <input type="range" id="color-opacity" class="slider" min="0" max="1" step="0.01" value="0.75">
+        </div>
+        <div>
+            <label for="contour-opacity">Contour Lines Opacity</label>
+            <input type="range" id="contour-opacity" class="slider" min="0" max="1" step="0.01" value="1">
+        </div>
+    </div>
+    <div class="height-info" id="height-info">Height: N/A</div>
+    <div class="spinner" id="spinner"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script>
+        // Define a custom CRS
+        var crs = L.extend({}, L.CRS.Simple, {
+            transformation: new L.Transformation(1, 0, -1, 0)
+        });
+
+        // Initialize the map with the custom CRS
+        var map = L.map('map', {
+            crs: crs,
+            minZoom: -5
+        });
+
+        // Load the height array from the CSV file
+        var heightArray = [];
+        Papa.parse('data/arraymaps/manicouagan_array.csv', {
+            download: true,
+            complete: function(results) {
+                heightArray = results.data;
+                heightArray = heightArray.map(function(row) {
+                    return row.map(function(cell) {
+                        return parseFloat(cell);
+                    });
+                });
+
+                // Define the bounds of the image overlays
+                var bounds = [[0, 0], [heightArray.length, heightArray[0].length]];
+
+                // Set the view to the center of the bounds
+                var centerX = heightArray[0].length / 2;
+                var centerY = heightArray.length / 2;
+                map.setView([centerY, centerX], -2);
+
+                // Add the satellite map layer
+                var satelliteLayer = L.imageOverlay('data/satmaps/Manicouagan_Map.png', bounds).addTo(map);
+                satelliteLayer.setOpacity(0.75);
+
+                // Add the color map layer
+                var colorLayer = L.imageOverlay('data/colormaps/manicouagan_colormap.png', bounds).addTo(map);
+                colorLayer.setOpacity(0.75);
+
+                // Add the contour lines layer
+                var contourLayer = L.imageOverlay('data/contourmaps/manicouagan_contour.png', bounds).addTo(map);
+
+                // Update the opacity of the satellite map layer
+                document.getElementById('satellite-opacity').addEventListener('input', function (e) {
+                    satelliteLayer.setOpacity(e.target.value);
+                });
+
+                // Update the opacity of the color map layer
+                document.getElementById('color-opacity').addEventListener('input', function (e) {
+                    colorLayer.setOpacity(e.target.value);
+                });
+
+                // Update the opacity of the contour lines layer
+                document.getElementById('contour-opacity').addEventListener('input', function (e) {
+                    contourLayer.setOpacity(e.target.value);
+                });
+
+                // Display the height value when the user hovers on the map
+                map.on('mousemove', function(e) {
+                    // Check if height array is loaded
+                    if (heightArray.length === 0) {
+                        return;
+                    }
+                    var x = Math.floor(e.latlng.lng);
+                    var y = Math.floor(e.latlng.lat);
+                    var height = heightArray[y] && heightArray[y][x] ? heightArray[y][x] : 'N/A';
+                    height = Math.round(height);
+                    document.getElementById('height-info').innerText = 'Height: ' + height + ' m';
+                });
+
+                // Store the lines of sight
+                var linesOfSight = [];
+
+                // Draw lines of sight when the user clicks on the map
+                map.on('click', function(e) {
+                    // Remove previous lines of sight
+                    linesOfSight.forEach(function(line) {
+                        map.removeLayer(line);
+                    });
+                    linesOfSight = [];
+
+                    var x = Math.floor(e.latlng.lng);
+                    var y = Math.floor(e.latlng.lat);
+                    var maxDistance = 5000; // Maximum distance in degrees
+                    var lines = [];
+
+                    for (var aimAngle = 0; aimAngle < 360; aimAngle += 1) {
+                        var endPoint = calculateLineOfSight(x, y, aimAngle, maxDistance);
+                        // Add all visible segments to the lines array
+                        for (var i = 0; i < endPoint.length - 1; i++) {
+                            if (i % 2 == 0) {
+                                // Convert to latlng
+                                lines.push([
+                                    [endPoint[i][1], endPoint[i][0]],
+                                    [endPoint[i + 1][1], endPoint[i + 1][0]]
+                                ]);
+                            }
+                        }
+                    }
+
+                    lines.forEach(function(line) {
+                        var polyline = L.polyline(line, {color: 'red', weight: 3, opacity:0.2}).addTo(map);
+                        linesOfSight.push(polyline);
+                    });
+                });
+
+                // Hide the spinner once the map is fully loaded
+                document.getElementById('spinner').style.display = 'none';
+            }
+        });
+
+        // Function to calculate the maximum line of sight in a given direction
+        function calculateLineOfSight(x, y, aimAngle, maxDistance) {
+            var rad = aimAngle * Math.PI / 180;
+            var dx = Math.cos(rad);
+            var dy = Math.sin(rad);
+            var distance = 0;
+            var playerHeight = 2;
+            var step = 5;
+            var playerHeight = playerHeight + heightArray[y][x];
+            var visible = true;
+            var angle = -Math.PI / 2;
+            var blockingAngle = 0;
+            var visible_segments = [[x, y]];
+            var currentX = x;
+            var currentY = y;
+
+            while (distance < maxDistance) {
+                currentX += dy * step;
+                currentY += dx * step;
+                
+                // Use Math.floor instead of Math.round to prevent excessive snapping
+                var gridX = Math.floor(currentX);
+                var gridY = Math.floor(currentY);
+                
+                distance += step;
+
+                if (gridX < 0 || gridX >= heightArray[0].length || gridY < 0 || gridY >= heightArray.length) {
+                    if (visible === true) {
+                        visible_segments.push([currentX, currentY]); // Use floating-point for smoother results
+                    }
+                    break;
+                }
+
+                var newHeight = heightArray[gridY][gridX];
+                var newAngle = Math.atan((newHeight - playerHeight) / distance);
+                if (newAngle < angle && visible === true) {
+                    visible = false;
+                    blockingAngle = newAngle;
+                    visible_segments.push([currentX, currentY]); // Preserve floating-point precision
+                }
+                if (newAngle > blockingAngle && visible === false) {
+                    visible = true;
+                    visible_segments.push([currentX, currentY]);
+                }
+                angle = newAngle;
+            }
+
+            return visible_segments;
+        }
+    </script>
+</body>
+</html>
