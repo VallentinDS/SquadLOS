@@ -9,6 +9,7 @@
         html, body {
             height: 100%;
             margin: 0;
+            font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
         }
         #map {
             height: 100%;
@@ -26,11 +27,22 @@
         }
         .slider {
             width: 200px;
+            display: block;
         }
         .height-info {
             position: absolute;
             bottom: 10px;
             left: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 5px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .distance-info {
+            position: absolute;
+            bottom: 10px;
+            left: 200px;
             z-index: 1000;
             background: white;
             padding: 5px;
@@ -54,6 +66,29 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        img.huechange { filter: hue-rotate(120deg); }
+        .description {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            max-width: 300px;
+        }
+        .selector-container {
+            position: absolute;
+            top: 10px;
+            right: 370px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        
     </style>
 </head>
 <body>
@@ -61,22 +96,73 @@
     <div class="slider-container">
         <div>
             <label for="satellite-opacity">Satellite Map Opacity</label>
-            <input type="range" id="satellite-opacity" class="slider" min="0" max="1" step="0.01" value="0.75">
+            <input type="range" id="satellite-opacity" class="slider" min="0" max="1" step="0.05" value="0.75">
         </div>
         <div>
             <label for="color-opacity">Color Map Opacity</label>
-            <input type="range" id="color-opacity" class="slider" min="0" max="1" step="0.01" value="0.75">
+            <input type="range" id="color-opacity" class="slider" min="0" max="1" step="0.05" value="0.75">
         </div>
         <div>
             <label for="contour-opacity">Contour Lines Opacity</label>
-            <input type="range" id="contour-opacity" class="slider" min="0" max="1" step="0.01" value="1">
+            <input type="range" id="contour-opacity" class="slider" min="0" max="1" step="0.05" value="1">
+        </div>
+        <div>
+            <label for="los-opacity">Lines of Sight Opacity</label>
+            <input type="range" id="los-opacity" class="slider" min="0" max="1" step="0.05" value="0.3">
         </div>
     </div>
     <div class="height-info" id="height-info">Height: N/A</div>
+    <div class="distance-info" id="distance-info">Distance: N/A</div>
+    <div class="description">
+        <h3>SquadLOS</h3>
+        <p>- Click on the map to display lines of sight from the clicked position.</p>
+        <p>- Middle mouse click to place markers and click on them to remove them.</p>
+        <p>Made by <a href="https://github.com/AlexandreSajus/SquadTopography" target="_blank">Alexandre Sajus</a></p>
+    </div>
+    <div class="selector-container">
+        <label for="map-selector">Select Map:</label>
+        <select id="map-selector">
+            <option value="Manicouagan">Manicouagan</option>
+            <option value="Goosebay">Goosebay</option>
+        </select>
+    </div>
     <div class="spinner" id="spinner"></div>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script>
+        // Get the selected map from the URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedMap = urlParams.get('map') || 'Manicouagan';
+
+        // Set the selected value in the dropdown
+        document.getElementById('map-selector').value = selectedMap;
+
+        // Define the paths for the map layers and heightmap based on the selected map
+        const mapPaths = {
+            Manicouagan: {
+                heightmap: 'data/arraymaps/manicouagan_array.csv',
+                satellite: 'data/satmaps/Manicouagan_Map.png',
+                colormap: 'data/colormaps/manicouagan_colormap.png',
+                contour: 'data/contourmaps/manicouagan_contour.png',
+                scaleX: 1,
+                scaleY: 1
+            },
+            Goosebay: {
+                heightmap: 'data/arraymaps/goosebay_array.csv',
+                satellite: 'data/satmaps/GooseBay_Minimap.png',
+                colormap: 'data/colormaps/goosebay_colormap.png',
+                contour: 'data/contourmaps/goosebay_contour.png',
+                scaleX: 1,
+                scaleY: 1
+            }
+        };
+
+        // Add event listener to the map selector
+        document.getElementById('map-selector').addEventListener('change', function() {
+            const selectedMap = this.value;
+            window.location.search = `?map=${selectedMap}`;
+        });
+
         // Define a custom CRS
         var crs = L.extend({}, L.CRS.Simple, {
             transformation: new L.Transformation(1, 0, -1, 0)
@@ -90,7 +176,13 @@
 
         // Load the height array from the CSV file
         var heightArray = [];
-        Papa.parse('data/arraymaps/manicouagan_array.csv', {
+        clickX = null;
+        clickY = null;
+        scaleX = mapPaths[selectedMap].scaleX;
+        scaleY = mapPaths[selectedMap].scaleY;
+        losOpacity = 0.3;
+        markers = [];
+        Papa.parse(mapPaths[selectedMap].heightmap, {
             download: true,
             complete: function(results) {
                 heightArray = results.data;
@@ -109,15 +201,15 @@
                 map.setView([centerY, centerX], -2);
 
                 // Add the satellite map layer
-                var satelliteLayer = L.imageOverlay('data/satmaps/Manicouagan_Map.png', bounds).addTo(map);
+                var satelliteLayer = L.imageOverlay(mapPaths[selectedMap].satellite, bounds).addTo(map);
                 satelliteLayer.setOpacity(0.75);
 
                 // Add the color map layer
-                var colorLayer = L.imageOverlay('data/colormaps/manicouagan_colormap.png', bounds).addTo(map);
+                var colorLayer = L.imageOverlay(mapPaths[selectedMap].colormap, bounds).addTo(map);
                 colorLayer.setOpacity(0.75);
 
                 // Add the contour lines layer
-                var contourLayer = L.imageOverlay('data/contourmaps/manicouagan_contour.png', bounds).addTo(map);
+                var contourLayer = L.imageOverlay(mapPaths[selectedMap].contour, bounds).addTo(map);
 
                 // Update the opacity of the satellite map layer
                 document.getElementById('satellite-opacity').addEventListener('input', function (e) {
@@ -134,6 +226,12 @@
                     contourLayer.setOpacity(e.target.value);
                 });
 
+                // Update the opacity of the contour lines layer
+                document.getElementById('los-opacity').addEventListener('input', function (e) {
+                    losOpacity = e.target.value;
+                    map.fire('click');
+                });
+
                 // Display the height value when the user hovers on the map
                 map.on('mousemove', function(e) {
                     // Check if height array is loaded
@@ -144,7 +242,14 @@
                     var y = Math.floor(e.latlng.lat);
                     var height = heightArray[y] && heightArray[y][x] ? heightArray[y][x] : 'N/A';
                     height = Math.round(height);
+                    if (clickX != null && clickY != null) {
+                        var distance = Math.sqrt(Math.pow((clickX - x)*scaleX, 2) + Math.pow((clickY - y)*scaleY, 2));
+                        distance = Math.round(distance);
+                    } else {
+                        distance = 'N/A';
+                    }
                     document.getElementById('height-info').innerText = 'Height: ' + height + ' m';
+                    document.getElementById('distance-info').innerText = 'Distance: ' + distance + ' m';
                 });
 
                 // Store the lines of sight
@@ -158,9 +263,25 @@
                     });
                     linesOfSight = [];
 
+                    // Remove previous marker
+                    map.eachLayer(function(layer) {
+                        if (layer instanceof L.Marker) {
+                            // Check that marker is not in the markers array
+                            if (!markers.includes(layer)) {
+                                map.removeLayer(layer);
+                        }
+                    }
+                    });
+
                     var x = Math.floor(e.latlng.lng);
                     var y = Math.floor(e.latlng.lat);
-                    var maxDistance = 5000; // Maximum distance in degrees
+
+                    // Add a marker at the clicked location
+                    var marker = L.marker([y, x]).addTo(map);
+                    marker._icon.classList.add('huechange');
+                    clickX = x;
+                    clickY = y;
+                    var maxDistance = 10000; // Maximum distance in degrees
                     var lines = [];
 
                     for (var aimAngle = 0; aimAngle < 360; aimAngle += 1) {
@@ -178,13 +299,32 @@
                     }
 
                     lines.forEach(function(line) {
-                        var polyline = L.polyline(line, {color: 'red', weight: 3, opacity:0.2}).addTo(map);
+                        var polyline = L.polyline(line, {color: 'red', weight: 3, opacity:losOpacity}).addTo(map);
                         linesOfSight.push(polyline);
                     });
                 });
 
                 // Hide the spinner once the map is fully loaded
                 document.getElementById('spinner').style.display = 'none';
+            }
+        });
+
+        // Add or remove marker on middle mouse button click
+        map.on('mousedown', function(e) {
+            if (e.originalEvent.button === 1) { // Middle mouse button
+                var x = Math.floor(e.latlng.lng);
+                var y = Math.floor(e.latlng.lat);
+                markerCounter = markers.length + 1;
+                var marker = L.marker([y, x]).addTo(map);
+                markers.push(marker);
+
+                // Add click event to remove marker
+                marker.on('click', function() {
+                    map.removeLayer(marker);
+                    markers = markers.filter(function(m) {
+                        return m !== marker;
+                    });
+                });
             }
         });
 
