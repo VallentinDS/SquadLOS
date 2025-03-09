@@ -88,6 +88,30 @@ p {
     margin: 10px;
 }
 
+.text-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px; /* Rounded corners */
+    padding: 5px; /* Padding around the text */
+}
+
+.text-marker-content p {
+    margin: 2px 0; /* Reduce vertical margin between paragraphs */
+    color: white; /* White text color */
+    text-shadow: 1px 1px 2px black; /* Black drop shadow */
+}
+
+.text-marker-arrow {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid rgba(0, 0, 0, 0.5); /* Arrow with semi-transparent background */
+    margin-top: -1px; /* Adjust the position of the arrow */
+}
+
 @media (max-width: 600px) {
     .slider-container {
         display: none;
@@ -115,3 +139,4 @@ p {
     }
 
 }
+

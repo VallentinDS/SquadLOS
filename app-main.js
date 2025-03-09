@@ -31,6 +31,7 @@ var scaleX = mapPaths[selectedMap].scaleX;
 var scaleY = mapPaths[selectedMap].scaleY;
 var losOpacity = 0.3;
 var markers = [];
+var textMarkers = [];
 
 // Load the height array from the CSV file
 Papa.parse(mapPaths[selectedMap].heightmap, {
@@ -129,6 +130,7 @@ Papa.parse(mapPaths[selectedMap].heightmap, {
 
             // Add a marker at the clicked location
             var marker = L.marker([y, x]).addTo(map);
+
             marker._icon.classList.add('huechange');
             clickX = x;
             clickY = y;
@@ -147,6 +149,32 @@ Papa.parse(mapPaths[selectedMap].heightmap, {
                     }
                 }
             }
+
+            // Recalculate the distance and azimut for each fixed marker
+            textMarkers.forEach(function(textMarker) {
+                var markerX = Math.floor(textMarker.getLatLng().lng);
+                var markerY = Math.floor(textMarker.getLatLng().lat);
+                var distanceToClick = Math.sqrt(Math.pow((clickX - markerX) * scaleX, 2) + Math.pow((clickY - markerY) * scaleY, 2));
+                distanceToClick = Math.round(distanceToClick * 3);
+                distanceToClick = distanceToClick + "m";
+                var azimutFromClick = Math.atan2((clickX - markerX) * scaleX, (clickY - markerY) * scaleY) * 180 / Math.PI + 180;
+                azimutFromClick = Math.round(azimutFromClick);
+                azimutFromClick = azimutFromClick + "°";
+                var new_marker = L.marker([markerY, markerX], {
+                    icon: new L.DivIcon({
+                        html:
+                            "<div class='text-marker'>" +
+                            "<div class='text-marker-content'>" +
+                            "<p>" + distanceToClick + "</p>" +
+                            "<p>" + azimutFromClick + "</p>" +
+                            "</div>" +
+                            "<div class='text-marker-arrow'></div>" +
+                            "</div>",
+                        className: 'text-marker-container'
+                    })
+                }).addTo(map);
+            });
+
 
             // Draw the lines of sight
             lines.forEach(function(line) {
@@ -167,7 +195,27 @@ map.on('mousedown', function(e) {
         var y = Math.floor(e.latlng.lat);
         var markerCounter = markers.length + 1;
         var marker = L.marker([y, x]).addTo(map);
+        var distanceToClick = Math.sqrt(Math.pow((clickX - x)*scaleX, 2) + Math.pow((clickY - y)*scaleY, 2));
+        distanceToClick = Math.round(distanceToClick * 3);
+        distanceToClick = distanceToClick + "m";
+        var azimutFromClick = Math.atan2((clickX - x)*scaleX, (clickY - y)*scaleY) * 180 / Math.PI + 180;
+        azimutFromClick = Math.round(azimutFromClick);
+        azimutFromClick = azimutFromClick + "°";
         markers.push(marker);
+        var text_marker = L.marker([y, x], {
+            icon: new L.DivIcon({
+                html: // Show distance and azimut from click
+                    "<div class='text-marker'>" +
+                    "<div class='text-marker-content'>" +
+                    "<p>" + distanceToClick + "</p>" +
+                    "<p>" + azimutFromClick + "</p>" +
+                    "</div>" +
+                    "<div class='text-marker-arrow'></div>" +
+                    "</div>",
+                className: 'text-marker-container'
+            })
+        }).addTo(map);
+        textMarkers.push(text_marker);
 
         // Add click event to remove marker
         marker.on('click', function() {
