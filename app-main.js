@@ -21,7 +21,7 @@ var crs = L.extend({}, L.CRS.Simple, {
 // Initialize the map with the custom coordinate reference system
 var map = L.map('map', {
     crs: crs,
-    minZoom: -5
+    minZoom: -1
 });
 
 var heightArray = [];
@@ -100,7 +100,7 @@ Papa.parse(mapPaths[selectedMap].heightmap, {
                 distance = 'N/A';
             }
             document.getElementById('height-info').innerText = 'Height: ' + height + ' m';
-            document.getElementById('distance-info').innerText = 'Distance: ' + distance + ' m';
+            document.getElementById('distance-info').innerText = 'Distance: ' + distance * 3 + ' m';
         });
 
         // Store the lines of sight
