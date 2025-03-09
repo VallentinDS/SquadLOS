@@ -1,6 +1,7 @@
 venv
 .vscode/
-data
 heightmaps
 satmaps
 archive/
+backup_data/
+data/
