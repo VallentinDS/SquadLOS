@@ -3,93 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Map with Leaflet</title>
+    <title>SquadLOS</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
-        }
-        #map {
-            height: 100%;
-            width: 100%;
-        }
-        .slider-container {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 1000;
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        }
-        .slider {
-            width: 200px;
-            display: block;
-        }
-        .height-info {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            z-index: 1000;
-            background: white;
-            padding: 5px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        }
-        .distance-info {
-            position: absolute;
-            bottom: 10px;
-            left: 200px;
-            z-index: 1000;
-            background: white;
-            padding: 5px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        }
-        .spinner {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 50px;
-            height: 50px;
-            margin: -25px 0 0 -25px;
-            border: 5px solid rgba(0, 0, 0, 0.1);
-            border-top: 5px solid #000;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            z-index: 1000;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        img.huechange { filter: hue-rotate(120deg); }
-        .description {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            max-width: 300px;
-        }
-        .selector-container {
-            position: absolute;
-            top: 10px;
-            right: 370px;
-            z-index: 1000;
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        }
-        
-    </style>
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
     <div id="map"></div>
@@ -122,261 +38,33 @@
     <div class="selector-container">
         <label for="map-selector">Select Map:</label>
         <select id="map-selector">
-            <option value="Manicouagan">Manicouagan</option>
+            <option value="Albasrah">Albasrah</option>
+            <option value="Anvil">Anvil</option>
+            <option value="Belaya">Belaya</option>
+            <option value="Blackcoast">Blackcoast</option>
+            <option value="Chora">Chora</option>
+            <option value="Fallujah">Fallujah</option>
+            <option value="Foolsroad">Foolsroad</option>
             <option value="Goosebay">Goosebay</option>
+            <option value="Gorodok">Gorodok</option>
+            <option value="Harju">Harju</option>
+            <option value="Kamdesh">Kamdesh</option>
+            <option value="Kohat">Kohat</option>
+            <option value="Kokan">Kokan</option>
+            <option value="Lashkar">Lashkar</option>
+            <option value="Logar">Logar</option>
+            <option value="Manicouagan">Manicouagan</option>
+            <option value="Mestia">Mestia</option>
+            <option value="Mutaha">Mutaha</option>
+            <option value="Narva">Narva</option>
+            <option value="Sumari">Sumari</option>
+            <option value="Tallil">Tallil</option>
+            <option value="Yehorivka">Yehorivka</option>
         </select>
     </div>
     <div class="spinner" id="spinner"></div>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <script>
-        // Get the selected map from the URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const selectedMap = urlParams.get('map') || 'Manicouagan';
-
-        // Set the selected value in the dropdown
-        document.getElementById('map-selector').value = selectedMap;
-
-        // Define the paths for the map layers and heightmap based on the selected map
-        const mapPaths = {
-            Manicouagan: {
-                heightmap: 'data/arraymaps/manicouagan_array.csv',
-                satellite: 'data/satmaps/Manicouagan_Map.png',
-                colormap: 'data/colormaps/manicouagan_colormap.png',
-                contour: 'data/contourmaps/manicouagan_contour.png',
-                scaleX: 1,
-                scaleY: 1
-            },
-            Goosebay: {
-                heightmap: 'data/arraymaps/goosebay_array.csv',
-                satellite: 'data/satmaps/GooseBay_Minimap.png',
-                colormap: 'data/colormaps/goosebay_colormap.png',
-                contour: 'data/contourmaps/goosebay_contour.png',
-                scaleX: 1,
-                scaleY: 1
-            }
-        };
-
-        // Add event listener to the map selector
-        document.getElementById('map-selector').addEventListener('change', function() {
-            const selectedMap = this.value;
-            window.location.search = `?map=${selectedMap}`;
-        });
-
-        // Define a custom CRS
-        var crs = L.extend({}, L.CRS.Simple, {
-            transformation: new L.Transformation(1, 0, -1, 0)
-        });
-
-        // Initialize the map with the custom CRS
-        var map = L.map('map', {
-            crs: crs,
-            minZoom: -5
-        });
-
-        // Load the height array from the CSV file
-        var heightArray = [];
-        clickX = null;
-        clickY = null;
-        scaleX = mapPaths[selectedMap].scaleX;
-        scaleY = mapPaths[selectedMap].scaleY;
-        losOpacity = 0.3;
-        markers = [];
-        Papa.parse(mapPaths[selectedMap].heightmap, {
-            download: true,
-            complete: function(results) {
-                heightArray = results.data;
-                heightArray = heightArray.map(function(row) {
-                    return row.map(function(cell) {
-                        return parseFloat(cell);
-                    });
-                });
-
-                // Define the bounds of the image overlays
-                var bounds = [[0, 0], [heightArray.length, heightArray[0].length]];
-
-                // Set the view to the center of the bounds
-                var centerX = heightArray[0].length / 2;
-                var centerY = heightArray.length / 2;
-                map.setView([centerY, centerX], -2);
-
-                // Add the satellite map layer
-                var satelliteLayer = L.imageOverlay(mapPaths[selectedMap].satellite, bounds).addTo(map);
-                satelliteLayer.setOpacity(0.75);
-
-                // Add the color map layer
-                var colorLayer = L.imageOverlay(mapPaths[selectedMap].colormap, bounds).addTo(map);
-                colorLayer.setOpacity(0.75);
-
-                // Add the contour lines layer
-                var contourLayer = L.imageOverlay(mapPaths[selectedMap].contour, bounds).addTo(map);
-
-                // Update the opacity of the satellite map layer
-                document.getElementById('satellite-opacity').addEventListener('input', function (e) {
-                    satelliteLayer.setOpacity(e.target.value);
-                });
-
-                // Update the opacity of the color map layer
-                document.getElementById('color-opacity').addEventListener('input', function (e) {
-                    colorLayer.setOpacity(e.target.value);
-                });
-
-                // Update the opacity of the contour lines layer
-                document.getElementById('contour-opacity').addEventListener('input', function (e) {
-                    contourLayer.setOpacity(e.target.value);
-                });
-
-                // Update the opacity of the contour lines layer
-                document.getElementById('los-opacity').addEventListener('input', function (e) {
-                    losOpacity = e.target.value;
-                    map.fire('click');
-                });
-
-                // Display the height value when the user hovers on the map
-                map.on('mousemove', function(e) {
-                    // Check if height array is loaded
-                    if (heightArray.length === 0) {
-                        return;
-                    }
-                    var x = Math.floor(e.latlng.lng);
-                    var y = Math.floor(e.latlng.lat);
-                    var height = heightArray[y] && heightArray[y][x] ? heightArray[y][x] : 'N/A';
-                    height = Math.round(height);
-                    if (clickX != null && clickY != null) {
-                        var distance = Math.sqrt(Math.pow((clickX - x)*scaleX, 2) + Math.pow((clickY - y)*scaleY, 2));
-                        distance = Math.round(distance);
-                    } else {
-                        distance = 'N/A';
-                    }
-                    document.getElementById('height-info').innerText = 'Height: ' + height + ' m';
-                    document.getElementById('distance-info').innerText = 'Distance: ' + distance + ' m';
-                });
-
-                // Store the lines of sight
-                var linesOfSight = [];
-
-                // Draw lines of sight when the user clicks on the map
-                map.on('click', function(e) {
-                    // Remove previous lines of sight
-                    linesOfSight.forEach(function(line) {
-                        map.removeLayer(line);
-                    });
-                    linesOfSight = [];
-
-                    // Remove previous marker
-                    map.eachLayer(function(layer) {
-                        if (layer instanceof L.Marker) {
-                            // Check that marker is not in the markers array
-                            if (!markers.includes(layer)) {
-                                map.removeLayer(layer);
-                        }
-                    }
-                    });
-
-                    var x = Math.floor(e.latlng.lng);
-                    var y = Math.floor(e.latlng.lat);
-
-                    // Add a marker at the clicked location
-                    var marker = L.marker([y, x]).addTo(map);
-                    marker._icon.classList.add('huechange');
-                    clickX = x;
-                    clickY = y;
-                    var maxDistance = 10000; // Maximum distance in degrees
-                    var lines = [];
-
-                    for (var aimAngle = 0; aimAngle < 360; aimAngle += 1) {
-                        var endPoint = calculateLineOfSight(x, y, aimAngle, maxDistance);
-                        // Add all visible segments to the lines array
-                        for (var i = 0; i < endPoint.length - 1; i++) {
-                            if (i % 2 == 0) {
-                                // Convert to latlng
-                                lines.push([
-                                    [endPoint[i][1], endPoint[i][0]],
-                                    [endPoint[i + 1][1], endPoint[i + 1][0]]
-                                ]);
-                            }
-                        }
-                    }
-
-                    lines.forEach(function(line) {
-                        var polyline = L.polyline(line, {color: 'red', weight: 3, opacity:losOpacity}).addTo(map);
-                        linesOfSight.push(polyline);
-                    });
-                });
-
-                // Hide the spinner once the map is fully loaded
-                document.getElementById('spinner').style.display = 'none';
-            }
-        });
-
-        // Add or remove marker on middle mouse button click
-        map.on('mousedown', function(e) {
-            if (e.originalEvent.button === 1) { // Middle mouse button
-                var x = Math.floor(e.latlng.lng);
-                var y = Math.floor(e.latlng.lat);
-                markerCounter = markers.length + 1;
-                var marker = L.marker([y, x]).addTo(map);
-                markers.push(marker);
-
-                // Add click event to remove marker
-                marker.on('click', function() {
-                    map.removeLayer(marker);
-                    markers = markers.filter(function(m) {
-                        return m !== marker;
-                    });
-                });
-            }
-        });
-
-        // Function to calculate the maximum line of sight in a given direction
-        function calculateLineOfSight(x, y, aimAngle, maxDistance) {
-            var rad = aimAngle * Math.PI / 180;
-            var dx = Math.cos(rad);
-            var dy = Math.sin(rad);
-            var distance = 0;
-            var playerHeight = 2;
-            var step = 5;
-            var playerHeight = playerHeight + heightArray[y][x];
-            var visible = true;
-            var angle = -Math.PI / 2;
-            var blockingAngle = 0;
-            var visible_segments = [[x, y]];
-            var currentX = x;
-            var currentY = y;
-
-            while (distance < maxDistance) {
-                currentX += dy * step;
-                currentY += dx * step;
-                
-                // Use Math.floor instead of Math.round to prevent excessive snapping
-                var gridX = Math.floor(currentX);
-                var gridY = Math.floor(currentY);
-                
-                distance += step;
-
-                if (gridX < 0 || gridX >= heightArray[0].length || gridY < 0 || gridY >= heightArray.length) {
-                    if (visible === true) {
-                        visible_segments.push([currentX, currentY]); // Use floating-point for smoother results
-                    }
-                    break;
-                }
-
-                var newHeight = heightArray[gridY][gridX];
-                var newAngle = Math.atan((newHeight - playerHeight) / distance);
-                if (newAngle < angle && visible === true) {
-                    visible = false;
-                    blockingAngle = newAngle;
-                    visible_segments.push([currentX, currentY]); // Preserve floating-point precision
-                }
-                if (newAngle > blockingAngle && visible === false) {
-                    visible = true;
-                    visible_segments.push([currentX, currentY]);
-                }
-                angle = newAngle;
-            }
-
-            return visible_segments;
-        }
-    </script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
