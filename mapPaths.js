@@ -152,6 +152,14 @@ export const mapPaths = {
         scaleX: 1,
         scaleY: 1
     },
+    Skorpo: {
+        heightmap: 'data/heightmaps/skorpo_array.csv',
+        satellite: 'data/satmaps/skorpo_sat.png',
+        colormap: 'data/colormaps/skorpo_color.png',
+        contour: 'data/contourmaps/skorpo_contour.png',
+        scaleX: 1,
+        scaleY: 1
+    },
     Sumari: {
         heightmap: 'data/heightmaps/sumari_array.csv',
         satellite: 'data/satmaps/sumari_sat.png',

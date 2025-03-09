@@ -23,6 +23,7 @@ map_dict = {
     "mestia": 120.0,
     "mutaha": 30.0,
     "narva": 100.0,
+    "skorpo": 350.0,
     "sumari": 75.0,
     "tallil": 125.0,
     "yehorivka": 400.0,
@@ -50,7 +51,14 @@ for MAP, SCALE_Z in map_dict.items():
     heightmap = heightmap * (SCALE_Z / 100) / 100
     heightmap = np.flipud(heightmap)
 
-    np.savetxt(ARRAYMAP_PATH, heightmap, delimiter=",", fmt="%d")
+    # Compressed heightmap will divide each axis by 3 with average pooling
+    compressed_heightmap = np.zeros((heightmap.shape[0] // 3, heightmap.shape[1] // 3))
+    for i in range(0, heightmap.shape[0] - 2, 3):
+        for j in range(0, heightmap.shape[1] - 2, 3):
+            compressed_heightmap[i // 3, j // 3] = np.mean(
+                heightmap[i : i + 3, j : j + 3]
+            )
+    np.savetxt(ARRAYMAP_PATH, compressed_heightmap, delimiter=",", fmt="%d")
     heightmap = xr.DataArray(heightmap)
 
     fig = pygmt.Figure()
