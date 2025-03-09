@@ -1,6 +1,6 @@
 # SquadLOS
 
-A website that provides topographic maps for Squad and line of sight calculations.
+A website that provides topographic maps for Squad and line of sight calculations: [squadlos.com](https://squadlos.com/)
 
 <p align="center">
   <img src="media/screenshot.png" alt="Website" width="80%"/>
