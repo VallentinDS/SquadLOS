@@ -5,3 +5,5 @@ satmaps
 archive/
 backup_data/
 data/
+.env
+logs/
