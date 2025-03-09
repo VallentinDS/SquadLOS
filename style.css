@@ -103,15 +103,6 @@ p {
     text-shadow: 1px 1px 2px black; /* Black drop shadow */
 }
 
-.text-marker-arrow {
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 5px solid rgba(0, 0, 0, 0.5); /* Arrow with semi-transparent background */
-    margin-top: -1px; /* Adjust the position of the arrow */
-}
-
 @media (max-width: 600px) {
     .slider-container {
         display: none;
