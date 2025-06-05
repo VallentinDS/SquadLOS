@@ -1,41 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <script
-        src="https://www.datadoghq-browser-agent.com/eu1/v6/datadog-rum.js"
-        type="text/javascript">
+    <script src="https://www.datadoghq-browser-agent.com/us1/v6/datadog-rum.js" type="text/javascript">
     </script>
     <script>
         window.DD_RUM && window.DD_RUM.init({
-        clientToken: 'pub77832a5054d29c6fddd32783139c275a',
-        applicationId: '46623bca-4f99-4ff6-9a02-efd1dbd95a07',
-        // `site` refers to the Datadog site parameter of your organization
-        // see https://docs.datadoghq.com/getting_started/site/
-        site: 'datadoghq.eu',
-        service: 'squadlos',
-        env: 'prod',
-        // Specify a version number to identify the deployed version of your application in Datadog
-        // version: '1.0.0',
-        sessionSampleRate: 100,
-        sessionReplaySampleRate: 20,
-        defaultPrivacyLevel: 'mask-user-input',
-        });
-    </script>
-    <script
-        src="https://www.datadoghq-browser-agent.com/eu1/v6/datadog-rum.js"
-        type="text/javascript">
-    </script>
-    <script>
-        window.DD_RUM && window.DD_RUM.init({
-        clientToken: 'pubcbfab22933dcde64ea7676054675d4ea',
-        applicationId: 'ccf6249e-60eb-40b1-8dbc-046c299c50f9',
-        // `site` refers to the Datadog site parameter of your organization
-        // see https://docs.datadoghq.com/getting_started/site/
-        site: 'datadoghq.eu',
-        service: 'squadlos',
-        env: 'prod',
-        // version: '1.0.0',
-        defaultPrivacyLevel: 'mask-user-input',
+            clientToken: 'pub54e8e564e62601d6cfca098658e102d8',
+            applicationId: '67c1f3b0-c03a-4d31-a2ba-ea0a34c71e42',
+            site: 'datadoghq.com',
+            service: 'squadlos',
+            env: 'prod',
+            version: '1.0.0',
+            sessionSampleRate: 100,
+            sessionReplaySampleRate: 100,
+            defaultPrivacyLevel: 'allow',
         });
     </script>
     <meta charset="UTF-8">
@@ -45,15 +24,15 @@
     <link rel="stylesheet" href="style.css" />
     <link rel="icon" type="image/x-icon" href="favicon.png">
 </head>
-<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6Q7BEE766B"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
 
-  gtag('config', 'G-6Q7BEE766B');
+    gtag('config', 'G-6Q7BEE766B');
 </script>
+
 <body>
     <div id="map"></div>
     <div class="slider-container">
@@ -115,4 +94,5 @@
     <script src="papaparse.min.js"></script>
     <script type="module" src="app-main.js"></script>
 </body>
+
 </html>
