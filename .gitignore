@@ -7,3 +7,4 @@ backup_data/
 data/
 .env
 logs/
+.DS_Store
