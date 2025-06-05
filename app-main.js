@@ -10,6 +10,7 @@ document.getElementById('map-selector').value = selectedMap;
 // Add event listener to the map selector
 document.getElementById('map-selector').addEventListener('change', function () {
     const selectedMap = this.value;
+    console.log(`Selected map: ${selectedMap}`);
     window.location.search = `?map=${selectedMap}`;
 });
 
@@ -156,6 +157,8 @@ Papa.parse(mapPaths[selectedMap].heightmap, {
             var x = Math.floor(e.latlng.lng);
             var y = Math.floor(e.latlng.lat);
 
+            console.log(`Placed LOS marker at: (${x}, ${y})`);
+
             // Add a marker at the clicked location
             var marker = L.marker([y, x]).addTo(map);
 
@@ -196,6 +199,7 @@ map.on('mousedown', function (e) {
     if (e.originalEvent.button === 1) { // Middle mouse button
         var x = Math.floor(e.latlng.lng);
         var y = Math.floor(e.latlng.lat);
+        console.log(`Placed marker at: (${x}, ${y})`);
         var markerCounter = markers.length + 1;
         var marker = L.marker([y, x]).addTo(map);
         var distanceToClick = Math.sqrt(Math.pow((clickX - x) * scaleX, 2) + Math.pow((clickY - y) * scaleY, 2));
@@ -209,6 +213,7 @@ map.on('mousedown', function (e) {
 
         // Add click event to remove marker
         marker.on('click', function () {
+            console.log(`Removed marker at: (${marker.getLatLng().lng}, ${marker.getLatLng().lat})`);
             map.removeLayer(marker);
             markers = markers.filter(function (m) {
                 return m !== marker;

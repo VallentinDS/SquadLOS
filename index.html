@@ -17,6 +17,15 @@
             defaultPrivacyLevel: 'allow',
         });
     </script>
+    <script type="text/javascript" src="https://www.datadoghq-browser-agent.com/us1/v6/datadog-logs.js"></script>
+    <script>
+        window.DD_LOGS && window.DD_LOGS.init({
+            clientToken: 'pub18a1d28a2702f56817f9f0b3d669d035',
+            site: 'datadoghq.com',
+            forwardErrorsToLogs: true,
+            sessionSampleRate: 100
+        });
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SquadLOS</title>
