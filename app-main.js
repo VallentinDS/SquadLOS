@@ -233,7 +233,13 @@ function calculateLineOfSight(x, y, aimAngle, maxDistance) {
     var distance = 0;
     var playerHeight = 2;
     var step = 5;
-    var playerHeight = playerHeight + heightArray[y][x];
+    if (
+        y >= 0 && y < heightArray.length &&
+        x >= 0 && x < heightArray[0].length &&
+        typeof heightArray[y][x] === 'number'
+    ) {
+        playerHeight = playerHeight + heightArray[y][x];
+    }
     var visible = true;
     var angle = -Math.PI / 2;
     var blockingAngle = 0;
