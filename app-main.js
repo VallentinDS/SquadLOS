@@ -44,7 +44,7 @@ function refreshMarkers(markers) {
         var markerX = Math.floor(marker.getLatLng().lng);
         var markerY = Math.floor(marker.getLatLng().lat);
         var distanceToClick = Math.sqrt(Math.pow((clickX - markerX) * scaleX, 2) + Math.pow((clickY - markerY) * scaleY, 2));
-        distanceToClick = Math.round(distanceToClick);
+        distanceToClick = Math.round(distanceToClick * 3);
         distanceToClick = distanceToClick + "m";
         var azimutFromClick = Math.atan2((clickX - markerX) * scaleX, (clickY - markerY) * scaleY) * 180 / Math.PI + 180;
         azimutFromClick = Math.round(azimutFromClick);
@@ -126,7 +126,7 @@ Papa.parse(mapPaths[selectedMap].heightmap, {
             height = Math.round(height);
             if (clickX != null && clickY != null) {
                 var distance = Math.sqrt(Math.pow((clickX - x) * scaleX, 2) + Math.pow((clickY - y) * scaleY, 2));
-                distance = Math.round(distance);
+                distance = Math.round(distance * 3);
             } else {
                 distance = 'N/A';
             }
@@ -204,7 +204,7 @@ map.on('mousedown', function (e) {
         var markerCounter = markers.length + 1;
         var marker = L.marker([y, x]).addTo(map);
         var distanceToClick = Math.sqrt(Math.pow((clickX - x) * scaleX, 2) + Math.pow((clickY - y) * scaleY, 2));
-        distanceToClick = Math.round(distanceToClick * 3);
+        distanceToClick = Math.round(distanceToClick);
         distanceToClick = distanceToClick + "m";
         var azimutFromClick = Math.atan2((clickX - x) * scaleX, (clickY - y) * scaleY) * 180 / Math.PI + 180;
         azimutFromClick = Math.round(azimutFromClick);
