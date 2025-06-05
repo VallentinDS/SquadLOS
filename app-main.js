@@ -8,7 +8,7 @@ const selectedMap = urlParams.get('map') || 'Manicouagan';
 document.getElementById('map-selector').value = selectedMap;
 
 // Add event listener to the map selector
-document.getElementById('map-selector').addEventListener('change', function() {
+document.getElementById('map-selector').addEventListener('change', function () {
     const selectedMap = this.value;
     window.location.search = `?map=${selectedMap}`;
 });
@@ -21,7 +21,7 @@ var crs = L.extend({}, L.CRS.Simple, {
 // Initialize the map with the custom coordinate reference system
 var map = L.map('map', {
     crs: crs,
-    minZoom: -1
+    minZoom: -2
 });
 
 var heightArray = [];
@@ -35,10 +35,10 @@ var textMarkers = [];
 
 // Recalculate the distance and azimut for each fixed marker
 function refreshMarkers(markers) {
-    textMarkers.forEach(function(text_marker) {
+    textMarkers.forEach(function (text_marker) {
         map.removeLayer(text_marker);
     });
-    markers.forEach(function(marker) {
+    markers.forEach(function (marker) {
         var markerX = Math.floor(marker.getLatLng().lng);
         var markerY = Math.floor(marker.getLatLng().lat);
         var distanceToClick = Math.sqrt(Math.pow((clickX - markerX) * scaleX, 2) + Math.pow((clickY - markerY) * scaleY, 2));
@@ -64,10 +64,10 @@ function refreshMarkers(markers) {
 // Load the height array from the CSV file
 Papa.parse(mapPaths[selectedMap].heightmap, {
     download: true,
-    complete: function(results) {
+    complete: function (results) {
         heightArray = results.data;
-        heightArray = heightArray.map(function(row) {
-            return row.map(function(cell) {
+        heightArray = heightArray.map(function (row) {
+            return row.map(function (cell) {
                 return parseFloat(cell);
             });
         });
@@ -113,7 +113,7 @@ Papa.parse(mapPaths[selectedMap].heightmap, {
         });
 
         // Display the height value when the user hovers on the map
-        map.on('mousemove', function(e) {
+        map.on('mousemove', function (e) {
             // Check if height array is loaded
             if (heightArray.length === 0) {
                 return;
@@ -123,7 +123,7 @@ Papa.parse(mapPaths[selectedMap].heightmap, {
             var height = heightArray[y] && heightArray[y][x] ? heightArray[y][x] : 'N/A';
             height = Math.round(height);
             if (clickX != null && clickY != null) {
-                var distance = Math.sqrt(Math.pow((clickX - x)*scaleX, 2) + Math.pow((clickY - y)*scaleY, 2));
+                var distance = Math.sqrt(Math.pow((clickX - x) * scaleX, 2) + Math.pow((clickY - y) * scaleY, 2));
                 distance = Math.round(distance);
             } else {
                 distance = 'N/A';
@@ -136,15 +136,15 @@ Papa.parse(mapPaths[selectedMap].heightmap, {
         var linesOfSight = [];
 
         // Draw lines of sight when the user clicks on the map
-        map.on('click', function(e) {
+        map.on('click', function (e) {
             // Remove previous lines of sight
-            linesOfSight.forEach(function(line) {
+            linesOfSight.forEach(function (line) {
                 map.removeLayer(line);
             });
             linesOfSight = [];
 
             // Remove previous marker
-            map.eachLayer(function(layer) {
+            map.eachLayer(function (layer) {
                 if (layer instanceof L.Marker) {
                     // Check that marker is not in the other markers array
                     if (!markers.includes(layer)) {
@@ -180,8 +180,8 @@ Papa.parse(mapPaths[selectedMap].heightmap, {
             refreshMarkers(markers);
 
             // Draw the lines of sight
-            lines.forEach(function(line) {
-                var polyline = L.polyline(line, {color: 'red', weight: 3, opacity:losOpacity}).addTo(map);
+            lines.forEach(function (line) {
+                var polyline = L.polyline(line, { color: 'red', weight: 3, opacity: losOpacity }).addTo(map);
                 linesOfSight.push(polyline);
             });
         });
@@ -192,25 +192,25 @@ Papa.parse(mapPaths[selectedMap].heightmap, {
 });
 
 // Add or remove static markers
-map.on('mousedown', function(e) {
+map.on('mousedown', function (e) {
     if (e.originalEvent.button === 1) { // Middle mouse button
         var x = Math.floor(e.latlng.lng);
         var y = Math.floor(e.latlng.lat);
         var markerCounter = markers.length + 1;
         var marker = L.marker([y, x]).addTo(map);
-        var distanceToClick = Math.sqrt(Math.pow((clickX - x)*scaleX, 2) + Math.pow((clickY - y)*scaleY, 2));
+        var distanceToClick = Math.sqrt(Math.pow((clickX - x) * scaleX, 2) + Math.pow((clickY - y) * scaleY, 2));
         distanceToClick = Math.round(distanceToClick * 3);
         distanceToClick = distanceToClick + "m";
-        var azimutFromClick = Math.atan2((clickX - x)*scaleX, (clickY - y)*scaleY) * 180 / Math.PI + 180;
+        var azimutFromClick = Math.atan2((clickX - x) * scaleX, (clickY - y) * scaleY) * 180 / Math.PI + 180;
         azimutFromClick = Math.round(azimutFromClick);
         azimutFromClick = azimutFromClick + "°";
         markers.push(marker);
         refreshMarkers(markers);
 
         // Add click event to remove marker
-        marker.on('click', function() {
+        marker.on('click', function () {
             map.removeLayer(marker);
-            markers = markers.filter(function(m) {
+            markers = markers.filter(function (m) {
                 return m !== marker;
             });
             refreshMarkers(markers);
@@ -238,11 +238,11 @@ function calculateLineOfSight(x, y, aimAngle, maxDistance) {
     while (distance < maxDistance) {
         currentX += dy * step;
         currentY += dx * step;
-        
+
         // Use Math.floor instead of Math.round to prevent excessive snapping
         var gridX = Math.floor(currentX);
         var gridY = Math.floor(currentY);
-        
+
         distance += step;
 
         if (gridX < 0 || gridX >= heightArray[0].length || gridY < 0 || gridY >= heightArray.length) {
