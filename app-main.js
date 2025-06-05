@@ -42,7 +42,7 @@ function refreshMarkers(markers) {
         var markerX = Math.floor(marker.getLatLng().lng);
         var markerY = Math.floor(marker.getLatLng().lat);
         var distanceToClick = Math.sqrt(Math.pow((clickX - markerX) * scaleX, 2) + Math.pow((clickY - markerY) * scaleY, 2));
-        distanceToClick = Math.round(distanceToClick * 3);
+        distanceToClick = Math.round(distanceToClick);
         distanceToClick = distanceToClick + "m";
         var azimutFromClick = Math.atan2((clickX - markerX) * scaleX, (clickY - markerY) * scaleY) * 180 / Math.PI + 180;
         azimutFromClick = Math.round(azimutFromClick);
@@ -129,7 +129,7 @@ Papa.parse(mapPaths[selectedMap].heightmap, {
                 distance = 'N/A';
             }
             document.getElementById('height-info').innerText = 'Height: ' + height + ' m';
-            document.getElementById('distance-info').innerText = 'Distance: ' + distance * 3 + ' m';
+            document.getElementById('distance-info').innerText = 'Distance: ' + distance + ' m';
         });
 
         // Store the lines of sight
