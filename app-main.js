@@ -22,7 +22,8 @@ var crs = L.extend({}, L.CRS.Simple, {
 // Initialize the map with the custom coordinate reference system
 var map = L.map('map', {
     crs: crs,
-    minZoom: -1
+    minZoom: -1,
+    attributionControl: false,
 });
 
 var heightArray = [];
