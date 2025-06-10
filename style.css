@@ -1,46 +1,76 @@
-html, body {
+html,
+body {
     height: 100%;
     margin: 0;
+    background: #181a1b !important;
+    /* Lighter black for dark mode */
+    color: #e0e0e0;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
+
 #map {
     height: 100%;
     width: 100%;
+    background: #181a1b !important;
+    /* Match page background */
 }
+
 .slider-container {
     position: absolute;
     top: 10px;
     left: 10px;
     z-index: 1000;
-    background: white;
+    background: #23272a;
     padding: 10px;
     border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+    color: #e0e0e0;
 }
+
 .slider {
     width: 200px;
     display: block;
+    background: #23272a;
+    color: #e0e0e0;
 }
+
+.slider {
+    width: 200px;
+    display: block;
+    background: #23272a;
+    color: #e0e0e0;
+    border-radius: 5px;
+    border: 1px solid #23272a;
+    accent-color: #4fc3f7;
+    /* For modern browsers: makes the slider thumb/track blue */
+}
+
+
+
 .height-info {
     position: absolute;
     bottom: 10px;
     left: 10px;
     z-index: 1000;
-    background: white;
+    background: #23272a;
+    color: #e0e0e0;
     padding: 5px;
     border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
 }
+
 .distance-info {
     position: absolute;
     bottom: 10px;
     left: 200px;
     z-index: 1000;
-    background: white;
+    background: #23272a;
+    color: #e0e0e0;
     padding: 5px;
     border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
 }
+
 .spinner {
     position: absolute;
     top: 50%;
@@ -48,44 +78,72 @@ html, body {
     width: 50px;
     height: 50px;
     margin: -25px 0 0 -25px;
-    border: 5px solid rgba(0, 0, 0, 0.1);
-    border-top: 5px solid #000;
+    border: 5px solid rgba(255, 255, 255, 0.1);
+    border-top: 5px solid #e0e0e0;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     z-index: 1000;
 }
+
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
-img.huechange { filter: hue-rotate(120deg); }
+
+img.huechange {
+    filter: hue-rotate(120deg);
+}
+
 .description {
     position: absolute;
     top: 10px;
     right: 10px;
     z-index: 1000;
-    background: white;
+    background: #23272a;
+    color: #e0e0e0;
     padding: 20px;
     border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
     max-width: 300px;
     padding-bottom: 10px;
 }
+
 .selector-container {
     position: absolute;
     top: 10px;
     right: 370px;
     z-index: 1000;
-    background: white;
+    background: #181a1b;
+    /* Match the main background */
+    color: #e0e0e0;
     padding: 10px;
     border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    /* Match site font */
 }
+
+.selector-container select,
+.selector-container option {
+    background: #181a1b;
+    color: #e0e0e0;
+    border: 1px solid #23272a;
+    font-family: inherit;
+}
+
 h3 {
     margin-top: 0;
+    color: #fff;
 }
+
 p {
     margin: 10px;
+    color: #e0e0e0;
 }
 
 .text-marker {
@@ -93,14 +151,31 @@ p {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-radius: 5px; /* Rounded corners */
-    padding: 5px; /* Padding around the text */
+    border-radius: 5px;
+    padding: 5px;
+    background: #23272a00;
 }
 
 .text-marker-content p {
-    margin: 2px 0; /* Reduce vertical margin between paragraphs */
-    color: white; /* White text color */
-    text-shadow: 1px 1px 2px black; /* Black drop shadow */
+    margin: 2px 0;
+    color: #fff;
+    text-shadow: 1px 1px 2px black;
+}
+
+a {
+    color: #4fc3f7;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+a:visited {
+    color: #90caf9;
+}
+
+a:hover,
+a:focus {
+    color: #fff;
+    text-decoration: underline;
 }
 
 @media (max-width: 600px) {
@@ -113,6 +188,8 @@ p {
         bottom: 10px;
         right: 10px;
         width: 30%;
+        background: #23272a;
+        color: #e0e0e0;
     }
 
     .distance-info {
@@ -120,14 +197,13 @@ p {
     }
 
     .description {
-        display: none; /* Hide description */
+        display: none;
     }
 
     .selector-container {
         position: absolute;
         right: 10px;
-
+        background: #23272a;
+        color: #e0e0e0;
     }
-
 }
-
