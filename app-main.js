@@ -155,6 +155,11 @@ Papa.parse(mapPaths[selectedMap].heightmap, {
                 }
             });
 
+            // Check if e and e.latlng are defined
+            if (!e || !e.latlng) {
+                return;
+            }
+
             var x = Math.floor(e.latlng.lng);
             var y = Math.floor(e.latlng.lat);
 
