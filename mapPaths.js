@@ -152,6 +152,15 @@ export const mapPaths = {
         scaleX: 1,
         scaleY: 1
     },
+    Sanxian: {
+        heightmap: 'data/heightmaps/sanxian_array.csv',
+        satellite: 'data/satmaps/sanxian_sat.png',
+        colormap: 'data/colormaps/sanxian_color.png',
+        contour: 'data/contourmaps/sanxian_contour.png',
+        scaleX: 1,
+        scaleY: 1
+    },
+
     Skorpo: {
         heightmap: 'data/heightmaps/skorpo_array.csv',
         satellite: 'data/satmaps/skorpo_sat.png',
