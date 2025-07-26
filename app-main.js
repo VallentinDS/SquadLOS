@@ -91,7 +91,7 @@ Papa.parse(mapPaths[selectedMap].heightmap, {
         colorLayer.setOpacity(0.75);
 
         // Add the contour lines layer
-        var contourLayer = L.imageOverlay(mapPaths[selectedMap].contour, bounds).addTo(map);
+        // var contourLayer = L.imageOverlay(mapPaths[selectedMap].contour, bounds).addTo(map);
 
         // Update the opacity of the satellite map layer
         document.getElementById('satellite-opacity').addEventListener('input', function (e) {
@@ -104,9 +104,9 @@ Papa.parse(mapPaths[selectedMap].heightmap, {
         });
 
         // Update the opacity of the contour lines layer
-        document.getElementById('contour-opacity').addEventListener('input', function (e) {
-            contourLayer.setOpacity(e.target.value);
-        });
+        // document.getElementById('contour-opacity').addEventListener('input', function (e) {
+            // contourLayer.setOpacity(e.target.value);
+        // });
 
         // Update the opacity of the lines of sight layer
         document.getElementById('los-opacity').addEventListener('input', function (e) {
