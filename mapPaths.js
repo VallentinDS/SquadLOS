@@ -157,8 +157,8 @@ export const mapPaths = {
         satellite: 'data/satmaps/sanxian_sat.png',
         colormap: 'data/colormaps/sanxian_color.png',
         contour: 'data/contourmaps/sanxian_contour.png',
-        scaleX: 1,
-        scaleY: 1
+        scaleX: 1.5,
+        scaleY: 1.5
     },
 
     Skorpo: {
