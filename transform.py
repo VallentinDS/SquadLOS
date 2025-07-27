@@ -23,22 +23,22 @@ map_dict = {
     # "mestia": 120.0,
     # "mutaha": 30.0,
     # "narva": 100.0,
-    "sanxian": 100.0 
-    # "skorpo": 350.0,
-    # "sumari": 75.0,
-    # "tallil": 125.0,
-    # "yehorivka": 400.0,
-}
+    "sanxian": 60.0, 
+#     "skorpo": 350.0,
+#     "sumari": 75.0,
+#     "tallil": 125.0,
+#     "yehorivka": 400.0,
+ }
 pygmt.show_versions()
 
 for MAP, SCALE_Z in map_dict.items():
     print(f"Processing {MAP}...")
-    ORIGINAL_PATH = f"/backup_data/satmaps/{MAP}.webp"
-    SATMAP_PATH = f"/data/satmaps/{MAP}_sat.png"
-    HEIGHTMAP_PATH = f"/backup_data/heightmaps/{MAP}_heightmap.png"
-    ARRAYMAP_PATH = f"/data/heightmaps/{MAP}_array.csv"
-    CONTOUR_PATH = f"/data/contourmaps/{MAP}_contour.png"
-    COLOR_PATH = f"/data/colormaps/{MAP}_color.png"
+    ORIGINAL_PATH = f"SquadLOS/backup_data/satmaps/{MAP}.webp"
+    SATMAP_PATH = f"SquadLOS/data/satmaps/{MAP}_sat.png"
+    HEIGHTMAP_PATH = f"SquadLOS/backup_data/heightmaps/{MAP}_heightmap.png"
+    ARRAYMAP_PATH = f"SquadLOS/data/heightmaps/{MAP}_array.csv"
+    CONTOUR_PATH = f"SquadLOS/data/contourmaps/{MAP}_contour.png"
+    COLOR_PATH = f"SquadLOS/data/colormaps/{MAP}_color.png"
 
     satmap = Image.open(ORIGINAL_PATH)
     # Save as png in satmap path
